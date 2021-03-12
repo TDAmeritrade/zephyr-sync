@@ -10,6 +10,7 @@ import lv.ctco.zephyr.util.ObjectTransformer;
 import lv.ctco.zephyr.service.*;
 
 import java.io.IOException;
+import java.io.ObjectInputFilter;
 import java.util.List;
 
 public class ZephyrSyncService {
