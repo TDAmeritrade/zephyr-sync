@@ -4,6 +4,7 @@
 .project
 .classpath
 .settings
+.DS_Store
 
 #Java output
 **/target/
