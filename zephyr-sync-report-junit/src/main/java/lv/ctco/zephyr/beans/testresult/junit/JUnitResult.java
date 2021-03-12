@@ -1,11 +1,6 @@
 package lv.ctco.zephyr.beans.testresult.junit;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlValue;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.math.BigDecimal;
@@ -13,7 +8,8 @@ import java.math.BigDecimal;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
         "error",
-        "failure"
+        "failure",
+        "systemOut"
 })
 public class JUnitResult {
 
@@ -29,6 +25,8 @@ public class JUnitResult {
     protected String classname;
     @XmlAttribute(name = "time", required = true)
     protected BigDecimal time;
+    @XmlElement(name="system-out")
+    protected String systemOut;
 
     public Error getError() {
         return error;
@@ -46,9 +44,11 @@ public class JUnitResult {
         this.failure = value;
     }
 
-    public String getName() {
-        return name;
-    }
+    public String getSystemOut() { return systemOut; }
+
+    public void setSystemOut(String value) { this.systemOut = value; }
+
+    public String getName() { return name; }
 
     public void setName(String value) {
         this.name = value;
@@ -146,4 +146,5 @@ public class JUnitResult {
             this.type = value;
         }
     }
+
 }

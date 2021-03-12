@@ -1,15 +1,17 @@
 package lv.ctco.zephyr.transformer;
 
+import lv.ctco.zephyr.Config;
+import lv.ctco.zephyr.beans.TestCase;
+import lv.ctco.zephyr.beans.TestStep;
+import lv.ctco.zephyr.enums.ConfigProperty;
+import lv.ctco.zephyr.enums.TestLevel;
+import lv.ctco.zephyr.enums.TestStatus;
 import io.qameta.allure.AllureResultsReader;
 import io.qameta.allure.FileSystemResultsReader;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.model.Label;
 import io.qameta.allure.model.StepResult;
 import io.qameta.allure.model.TestResult;
-import lv.ctco.zephyr.beans.TestCase;
-import lv.ctco.zephyr.beans.TestStep;
-import lv.ctco.zephyr.enums.TestLevel;
-import lv.ctco.zephyr.enums.TestStatus;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -37,8 +39,8 @@ public class AllureTransformer implements ReportTransformer {
     }
 
     @Override
-    public List<TestCase> transformToTestCases(String reportPath) {
-        return transform(readAllureReport(reportPath));
+    public List<TestCase> transformToTestCases(Config config) {
+        return transform(readAllureReport(config.getValue(ConfigProperty.REPORT_PATH)));
     }
 
     private Stream<TestResult> readAllureReport(String path) {

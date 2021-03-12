@@ -2,8 +2,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>zephyr-sync-master</artifactId>
-        <groupId>lv.ctco.zephyr</groupId>
-        <version>0.0.16-SNAPSHOT</version>
+        <groupId>lv.ctco</groupId>
+        <version>0.2.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -41,27 +41,27 @@
 
     <dependencies>
         <dependency>
-            <groupId>lv.ctco.zephyr</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>zephyr-sync-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>lv.ctco.zephyr</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>zephyr-sync-report-junit</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>lv.ctco.zephyr</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>zephyr-sync-report-allure</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>lv.ctco.zephyr</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>zephyr-sync-report-cucumber</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>lv.ctco.zephyr</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>zephyr-sync-report-nunit</artifactId>
             <version>${project.version}</version>
         </dependency>

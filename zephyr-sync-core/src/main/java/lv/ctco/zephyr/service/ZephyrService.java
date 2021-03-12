@@ -4,24 +4,21 @@ import lv.ctco.zephyr.Config;
 import lv.ctco.zephyr.beans.TestCase;
 import lv.ctco.zephyr.beans.TestStep;
 import lv.ctco.zephyr.beans.jira.Issue;
-import lv.ctco.zephyr.beans.zapi.Execution;
 import lv.ctco.zephyr.beans.zapi.ExecutionRequest;
 import lv.ctco.zephyr.beans.zapi.ExecutionResponse;
 import lv.ctco.zephyr.beans.zapi.ZapiTestStep;
+import lv.ctco.zephyr.enums.TestStatus;
+import lv.ctco.zephyr.util.HttpUtils;
+import lv.ctco.zephyr.beans.zapi.Execution;
 import lv.ctco.zephyr.util.ObjectTransformer;
 import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.lang.String.format;
 import static lv.ctco.zephyr.enums.ConfigProperty.*;
-import static lv.ctco.zephyr.util.HttpUtils.*;
 import static lv.ctco.zephyr.util.Utils.log;
 
 public class ZephyrService {
@@ -37,8 +34,8 @@ public class ZephyrService {
     private Map<String, Execution> getAllExecutions(Config config) throws IOException {
         log("Fetching JIRA Test Executions for the project");
         int skip = 0;
-        String search = "project='" + config.getValue(PROJECT_KEY) + "'%20and%20fixVersion='"
-                + URLEncoder.encode(config.getValue(RELEASE_VERSION), "UTF-8") + "'%20and%20cycleName='" + config.getValue(TEST_CYCLE) + "'";
+        String search = "project='" + config.getValue(PROJECT_KEY) + ((config.getValue(RELEASE_VERSION) != null && !config.getValue(RELEASE_VERSION).equals("")) ? "'%20and%20fixVersion='"
+                + URLEncoder.encode(config.getValue(RELEASE_VERSION), "UTF-8") : "")+ "'%20and%20cycleName='" + config.getValue(TEST_CYCLE) + "'";
 
         ExecutionResponse executionResponse = searchInZQL(search, skip);
         if (executionResponse == null || executionResponse.getExecutions().isEmpty()) {
@@ -67,7 +64,7 @@ public class ZephyrService {
     }
 
     private ExecutionResponse searchInZQL(String search, int skip) throws IOException {
-        String response = getAndReturnBody(config, "zapi/latest/zql/executeSearch?zqlQuery=" + search + "&offset=" + skip);
+        String response = HttpUtils.getAndReturnBody(config, "zapi/latest/zql/executeSearch?zqlQuery=" + search + "&offset=" + skip);
         return ObjectTransformer.deserialize(response, ExecutionResponse.class);
     }
 
@@ -77,7 +74,7 @@ public class ZephyrService {
         List<String> keys = new ArrayList<>();
 
         for (TestCase testCase : testCases) {
-            if (!executions.containsKey(testCase.getKey())) {
+            if (!executions.containsKey(testCase.getKey()) && !keys.contains(testCase.getKey())) {
                 keys.add(testCase.getKey());
             }
         }
@@ -108,8 +105,8 @@ public class ZephyrService {
         */
 
         // TODO: for ZAPI version 2.3.0 or higher implement handling of jobProgressToken
-        HttpResponse response = post(config, "zapi/latest/execution/addTestsToCycle/", execution);
-        ensureResponse(response, 200, "Could not link Test cases");
+        HttpResponse response = HttpUtils.post(config, "zapi/latest/execution/addTestsToCycle/", execution);
+        HttpUtils.ensureResponse(response, 200, "Could not link Test cases");
 
         // waiting for addTestsToCycle() to finish it's job, workaround/hack/waiter for ZAPI version lover than 2.3.0
         int iteration = 0;
@@ -134,10 +131,15 @@ public class ZephyrService {
     public void updateExecutionStatuses(List<TestCase> testCases) throws IOException {
         Map<String, Execution> executions = getAllExecutions(config);
 
+        if ("true".equals(config.getValue(CONSOLIDATE_PARAMETERIZED_TESTS))){
+            testCases = consolidateTestCases(testCases);
+        }
+
         for (TestCase testCase : testCases) {
             log("INFO: Setting status " + testCase.getStatus() + " for Test: " + testCase.getKey() + "");
 
             Execution execution = executions.get(testCase.getKey());
+
             if (execution == null) {
                 log("WARN: Test " + testCase.getKey() + " not found in Test Cycle " + config.getValue(TEST_CYCLE) + "");
                 continue;
@@ -145,10 +147,58 @@ public class ZephyrService {
 
             ExecutionRequest request = new ExecutionRequest();
             request.setStatus(testCase.getStatus().getId());
-            HttpResponse response = put(config, "zapi/latest/execution/" + execution.getId() + "/execute", request);
-            ensureResponse(response, 200, "Could not successfully update execution status");
+            request.setComment(testCase.getExecutionSummary());
+            HttpResponse response = HttpUtils.put(config, "zapi/latest/execution/" + execution.getId() + "/execute", request);
+            HttpUtils.ensureResponse(response, 200, "Could not successfully update execution status");
         }
     }
+
+    public List<TestCase> consolidateTestCases(final List<TestCase> testCases){
+        List<TestCase> output = new ArrayList<>();
+        Collections.sort(testCases);
+        TestCase consolidatedTestCase = null;
+        List<String> failedItems = new ArrayList<>();
+        String summary = "Total Items: %s \n" +
+                "Total Passed: %s \n" +
+                "Total Failed: %s \n" +
+                "Failed Items: %s";
+        int totalFailedItems=0;
+        int totalPassedItems=0;
+        for (TestCase testCase : testCases){
+            String consolidatedName = testCase.getConsolidatedName();
+            String name = testCase.getName();
+            if (testCase.getConsolidatedName().equals(testCase.getName())){
+                output.add(testCase);
+                if (consolidatedTestCase != null){
+                    consolidatedTestCase.setExecutionSummary(String.format(summary, totalPassedItems+totalFailedItems, totalPassedItems, totalFailedItems, failedItems.toString()));
+                    consolidatedTestCase.setStatus(totalFailedItems>0 ? TestStatus.FAILED : TestStatus.PASSED);
+                    output.add(consolidatedTestCase);
+                }
+                consolidatedTestCase = null;
+                failedItems = new ArrayList<>();
+                totalFailedItems=0;
+                totalPassedItems=0;
+                continue;
+            }
+            if (consolidatedTestCase == null){
+                consolidatedTestCase = (TestCase)testCase.clone();
+                consolidatedTestCase.setName(testCase.getConsolidatedName());
+            }
+            if (testCase.getStatus().equals(TestStatus.PASSED)){
+                totalPassedItems++;
+            }else{
+                totalFailedItems++;
+                failedItems.add(testCase.getConsolidatedArrayLocation());
+            }
+        }
+        if (consolidatedTestCase != null){
+            consolidatedTestCase.setExecutionSummary(String.format(summary, totalPassedItems+totalFailedItems, totalPassedItems, totalFailedItems, failedItems.toString()));
+            consolidatedTestCase.setStatus(totalFailedItems>0 ? TestStatus.FAILED : TestStatus.PASSED);
+            output.add(consolidatedTestCase);
+        }
+        return output;
+    }
+
 
     public void addStepsToTestIssue(TestCase testCase) throws IOException {
         log("INFO: Getting Test Steps for Test: " + testCase.getKey());
@@ -161,8 +211,8 @@ public class ZephyrService {
         Map<Integer, TestStep> map = prepareTestSteps(testSteps, 0, "", Boolean.valueOf(config.getValue(ORDERED_STEPS)));
         log("INFO: Setting Test Steps for Test: " + testCase.getKey());
         for (TestStep step : map.values()) {
-            HttpResponse response = post(config, "zapi/latest/teststep/" + testCase.getId(), new ZapiTestStep(step.getDescription()));
-            ensureResponse(response, 200, "Could not add Test Steps for Test Case: " + testCase.getId());
+            HttpResponse response = HttpUtils.post(config, "zapi/latest/teststep/" + testCase.getId(), new ZapiTestStep(step.getDescription()));
+            HttpUtils.ensureResponse(response, 200, "Could not add Test Steps for Test Case: " + testCase.getId());
         }
     }
 
@@ -195,7 +245,7 @@ public class ZephyrService {
 
         for (TestCase testCase : resultTestCases) {
             String testCaseKey = testCase.getKey();
-            String testCaseName = testCase.getName();
+            String testCaseName = "true".equals(config.getValue(CONSOLIDATE_PARAMETERIZED_TESTS)) ? testCase.getConsolidatedName() : testCase.getName();
             // case when test case can be matched by id
             if (testCaseKey != null && uniqueKeyMap.containsKey(testCaseKey)) {
                 testCase.setId(uniqueKeyMap.get(testCaseKey).getId());

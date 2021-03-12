@@ -1,7 +1,7 @@
 package lv.ctco.zephyr.beans.jira;
 
-import lv.ctco.zephyr.Config;
 import lv.ctco.zephyr.beans.TestCase;
+import lv.ctco.zephyr.Config;
 import lv.ctco.zephyr.enums.ConfigProperty;
 import lv.ctco.zephyr.enums.IssueType;
 import lv.ctco.zephyr.enums.TestLevel;
@@ -17,13 +17,30 @@ public class FieldsTest {
 
     @Test
     public void shouldPopulateTestCaseFieldsToJiraObject() throws Exception{
+        Config config = new Config();
+        config.setValue(ConfigProperty.CONSOLIDATE_PARAMETERIZED_TESTS, "false");
         TestCase testCase = createTestCase("testCaseName", "testCaseDescription", TestLevel.CRITICAL, TestLevel.LOW);
         Issue issue = createIssue();
-        setIssueFieldsFromTestCaseAttributes(issue, testCase);
+        setIssueFieldsFromTestCaseAttributes(config, issue, testCase);
         assertEquals(testCase.getName(), issue.getFields().getSummary());
         assertEquals(testCase.getDescription(), issue.getFields().getDescription());
         assertArrayEquals(new String[]{"Automation"}, issue.getFields().getLabels());
-        assertEquals(testCase.getPriority().getName(), issue.getFields().getPriority().getName());
+        //assertEquals(testCase.getPriority().getName(), issue.getFields().getPriority().getName());
+        assertEquals(testCase.getSeverity().getIndex().toString(), issue.getFields().getSeverity().getId());
+        assertEquals(IssueType.TEST.getName(), issue.getFields().getIssuetype().getName());
+    }
+
+    @Test
+    public void shouldPopulateTestCaseFieldsToJiraObjectConsolidated() throws Exception{
+        Config config = new Config();
+        config.setValue(ConfigProperty.CONSOLIDATE_PARAMETERIZED_TESTS, "true");
+        TestCase testCase = createTestCase("testCaseName [0]", "testCaseDescription", TestLevel.CRITICAL, TestLevel.LOW);
+        Issue issue = createIssue();
+        setIssueFieldsFromTestCaseAttributes(config, issue, testCase);
+        assertEquals(testCase.getConsolidatedName(), issue.getFields().getSummary());
+        assertEquals(testCase.getDescription(), issue.getFields().getDescription());
+        assertArrayEquals(new String[]{"Automation"}, issue.getFields().getLabels());
+        //assertEquals(testCase.getPriority().getName(), issue.getFields().getPriority().getName());
         assertEquals(testCase.getSeverity().getIndex().toString(), issue.getFields().getSeverity().getId());
         assertEquals(IssueType.TEST.getName(), issue.getFields().getIssuetype().getName());
     }
@@ -44,9 +61,10 @@ public class FieldsTest {
         Config config = createConfig("PRJ","Version 1.2.3", "employee", "Major");
         Issue issue = createIssue();
         setIssueFieldsFromConfig(issue, config);
-        setIssueFieldsFromTestCaseAttributes(issue, testCase);
+        setIssueFieldsFromTestCaseAttributes(config, issue, testCase);
         String json = ObjectTransformer.serialize(issue.getFields());
-        String expectedJson = "{\"summary\":\"testCaseName\",\"description\":\"testCaseDescription\",\"project\":{\"key\":\"PRJ\"},\"assignee\":{\"name\":\"employee\"},\"issuetype\":{\"name\":\"Test\"},\"priority\":{\"name\":\"Low\"},\"severity\":{\"id\":\"10121\"},\"versions\":[{\"name\":\"Version 1.2.3\"}],\"labels\":[\"Automation\"]}";
+        //String expectedJson = "{\"summary\":\"testCaseName\",\"description\":\"testCaseDescription\",\"project\":{\"key\":\"PRJ\"},\"assignee\":{\"name\":\"employee\"},\"issuetype\":{\"name\":\"Test\"},\"priority\":{\"name\":\"Low\"},\"severity\":{\"id\":\"10121\"},\"versions\":[{\"name\":\"Version 1.2.3\"}],\"labels\":[\"Automation\"]}";
+        String expectedJson = "{\"summary\":\"testCaseName\",\"description\":\"testCaseDescription\",\"project\":{\"key\":\"PRJ\"},\"assignee\":{\"name\":\"employee\"},\"issuetype\":{\"name\":\"Test\"},\"severity\":{\"id\":\"10121\"},\"versions\":[{\"name\":\"Version 1.2.3\"}],\"labels\":[\"Automation\"]}";
         assertEquals(expectedJson, json);
     }
 

@@ -1,10 +1,12 @@
 package lv.ctco.zephyr.transformer;
 
+import lv.ctco.zephyr.Config;
 import lv.ctco.zephyr.ZephyrSyncException;
-import lv.ctco.zephyr.beans.TestCase;
 import lv.ctco.zephyr.beans.testresult.nunit.NUnitResultTestRun;
 import lv.ctco.zephyr.beans.testresult.nunit.NUnitTestCase;
 import lv.ctco.zephyr.beans.testresult.nunit.NUnitTestSuite;
+import lv.ctco.zephyr.beans.TestCase;
+import lv.ctco.zephyr.enums.ConfigProperty;
 import lv.ctco.zephyr.enums.TestStatus;
 
 import javax.xml.bind.JAXBContext;
@@ -23,8 +25,9 @@ public class NUnitTransformer implements ReportTransformer {
         return "nunit";
     }
 
-    public List<TestCase> transformToTestCases(String reportPath) {
-        return transform(readNunitReport(reportPath));
+    public List<TestCase> transformToTestCases(Config config) {
+
+        return transform(readNunitReport(config.getValue(ConfigProperty.REPORT_PATH)));
     }
 
     NUnitResultTestRun readNunitReport(String path) {

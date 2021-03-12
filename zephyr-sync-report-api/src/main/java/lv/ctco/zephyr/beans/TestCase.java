@@ -4,10 +4,22 @@ import lv.ctco.zephyr.enums.TestLevel;
 import lv.ctco.zephyr.enums.TestStatus;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class TestCase {
+public class TestCase implements Comparable<TestCase>, Cloneable{
 
     private Integer id;
+
+    @Override
+    public Object clone(){
+        try {
+            return super.clone();
+        }catch(CloneNotSupportedException e){
+            return this;
+        }
+    }
+
     private String key;
     private String uniqueId;
     private String suiteName;
@@ -19,6 +31,8 @@ public class TestCase {
     private TestStatus status = TestStatus.NOT_EXECUTED;
     private TestLevel severity;
     private TestLevel priority = TestLevel.MEDIUM;
+    private String executionSummary;
+    Pattern consolidatedNamePattern = Pattern.compile("\\[(\\d+)\\]$");
 
     public Integer getId() {
         return id;
@@ -115,4 +129,31 @@ public class TestCase {
     public void setSuiteName(String suiteName) {
         this.suiteName = suiteName;
     }
+
+    public String getExecutionSummary() {
+        return executionSummary;
+    }
+
+    public void setExecutionSummary(String executionSummary) {
+        this.executionSummary = executionSummary;
+    }
+
+    @Override
+    public int compareTo(TestCase o) {
+        return this.getName() == null ? 0 : this.getName().compareTo(o.getName());
+    }
+
+    public String getConsolidatedName(){
+        return getName() == null ? null : getName().replaceAll(consolidatedNamePattern.pattern(), "").trim();
+    }
+
+    public String getConsolidatedArrayLocation(){
+        Matcher matcher = consolidatedNamePattern.matcher(getName());
+        if (matcher.find() && matcher.groupCount()>0){
+            return matcher.group(1);
+        }else{
+            return "";
+        }
+    }
+
 }

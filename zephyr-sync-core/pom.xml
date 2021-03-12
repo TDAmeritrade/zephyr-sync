@@ -3,9 +3,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>lv.ctco.zephyr</groupId>
+        <groupId>lv.ctco</groupId>
         <artifactId>zephyr-sync-master</artifactId>
-        <version>0.0.16-SNAPSHOT</version>
+        <version>0.2.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>zephyr-sync-core</artifactId>
@@ -21,7 +21,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>lv.ctco.zephyr.Runner</mainClass>
+                            <mainClass>Runner</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -53,17 +53,22 @@
 
     <dependencies>
         <dependency>
-            <groupId>lv.ctco.zephyr</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>zephyr-sync-util</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>lv.ctco.zephyr</groupId>
+            <groupId>lv.ctco</groupId>
             <artifactId>zephyr-sync-report-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>lv.ctco.zephyr</groupId>
+            <groupId>lv.ctco</groupId>
+            <artifactId>zephyr-sync-config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>zephyr-sync-report-junit</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>

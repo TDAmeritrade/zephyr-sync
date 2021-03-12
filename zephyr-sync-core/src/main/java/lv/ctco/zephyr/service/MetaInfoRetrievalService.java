@@ -1,11 +1,12 @@
 package lv.ctco.zephyr.service;
 
 import lv.ctco.zephyr.Config;
-import lv.ctco.zephyr.ZephyrSyncException;
 import lv.ctco.zephyr.beans.Metafield;
 import lv.ctco.zephyr.beans.jira.Project;
 import lv.ctco.zephyr.beans.zapi.Cycle;
 import lv.ctco.zephyr.beans.zapi.CycleList;
+import lv.ctco.zephyr.util.HttpUtils;
+import lv.ctco.zephyr.ZephyrSyncException;
 import lv.ctco.zephyr.beans.zapi.NewCycle;
 import lv.ctco.zephyr.util.Utils;
 import lv.ctco.zephyr.enums.ConfigProperty;
@@ -15,8 +16,6 @@ import org.apache.http.HttpResponse;
 import java.io.IOException;
 import java.util.Map;
 
-import static lv.ctco.zephyr.util.HttpUtils.getAndReturnBody;
-import static lv.ctco.zephyr.util.HttpUtils.post;
 import static java.lang.String.format;
 
 public class MetaInfoRetrievalService {
@@ -36,7 +35,7 @@ public class MetaInfoRetrievalService {
 
     private void retrieveProjectMetaInfo(MetaInfo metaInfo) throws IOException {
         String projectKey = config.getValue(ConfigProperty.PROJECT_KEY);
-        String response = getAndReturnBody(config, format("api/2/project/%s", projectKey));
+        String response = HttpUtils.getAndReturnBody(config, format("api/2/project/%s", projectKey));
         Project project = ObjectTransformer.deserialize(response, Project.class);
 
         if (project == null || project.getKey() == null || !project.getKey().equals(projectKey)) {
@@ -59,10 +58,13 @@ public class MetaInfoRetrievalService {
     private void retrieveTestCycleId(MetaInfo metaInfo) throws IOException {
         String projectId = metaInfo.getProjectId();
         String versionId = metaInfo.getVersionId();
+        if (versionId == null || versionId.equals("")){
+            versionId = "-1";
+        }
         if (projectId == null || versionId == null)
             throw new ZephyrSyncException("JIRA projectID or versionID are missing");
 
-        String response = getAndReturnBody(config, format("zapi/latest/cycle?projectId=%s&versionId=%s", projectId, versionId));
+        String response = HttpUtils.getAndReturnBody(config, format("zapi/latest/cycle?projectId=%s&versionId=%s", projectId, versionId));
         CycleList cycleList = ObjectTransformer.deserialize(response, CycleList.class);
         if (cycleList == null || cycleList.getCycleMap().isEmpty()) {
             throw new ZephyrSyncException("Unable to retrieve JIRA test cycle");
@@ -95,7 +97,7 @@ public class MetaInfoRetrievalService {
         newCycle.setProjectId(projectId);
         newCycle.setVersionId(versionId);
         newCycle.setName(config.getValue(ConfigProperty.TEST_CYCLE));
-        HttpResponse response = post(config, "zapi/latest/cycle", newCycle);
+        HttpResponse response = HttpUtils.post(config, "zapi/latest/cycle", newCycle);
         Cycle cycle = ObjectTransformer.deserialize(Utils.readInputStream(response.getEntity().getContent()), Cycle.class);
         return cycle.getId();
     }

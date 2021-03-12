@@ -1,14 +1,16 @@
 package lv.ctco.zephyr.transformer;
 
 
-import lv.ctco.zephyr.ZephyrSyncException;
+import lv.ctco.zephyr.Config;
 import lv.ctco.zephyr.beans.TestCase;
 import lv.ctco.zephyr.beans.TestStep;
 import lv.ctco.zephyr.beans.testresult.cucumber.Feature;
 import lv.ctco.zephyr.beans.testresult.cucumber.Scenario;
+import lv.ctco.zephyr.enums.ConfigProperty;
+import lv.ctco.zephyr.enums.TestStatus;
+import lv.ctco.zephyr.ZephyrSyncException;
 import lv.ctco.zephyr.beans.testresult.cucumber.Step;
 import lv.ctco.zephyr.beans.testresult.cucumber.Tag;
-import lv.ctco.zephyr.enums.TestStatus;
 import lv.ctco.zephyr.util.ObjectTransformer;
 import lv.ctco.zephyr.util.Utils;
 
@@ -26,8 +28,8 @@ public class CucumberTransformer implements ReportTransformer {
         return "cucumber";
     }
 
-    public List<TestCase> transformToTestCases(String reportPath) {
-        return transform(readCucumberReport(reportPath));
+    public List<TestCase> transformToTestCases(Config config) {
+        return transform(readCucumberReport(config.getValue(ConfigProperty.REPORT_PATH)));
     }
 
     String readCucumberReport(String path) {

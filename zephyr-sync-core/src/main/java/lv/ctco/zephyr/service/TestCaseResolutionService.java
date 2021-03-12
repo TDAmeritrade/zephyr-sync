@@ -1,16 +1,14 @@
 package lv.ctco.zephyr.service;
 
 import lv.ctco.zephyr.Config;
-import lv.ctco.zephyr.ZephyrSyncException;
 import lv.ctco.zephyr.beans.TestCase;
+import lv.ctco.zephyr.enums.ConfigProperty;
 import lv.ctco.zephyr.transformer.ReportTransformer;
 import lv.ctco.zephyr.transformer.ReportTransformerFactory;
+import lv.ctco.zephyr.ZephyrSyncException;
 
 import java.util.Iterator;
 import java.util.List;
-
-import static lv.ctco.zephyr.enums.ConfigProperty.REPORT_PATH;
-import static lv.ctco.zephyr.enums.ConfigProperty.REPORT_TYPE;
 
 public class TestCaseResolutionService {
 
@@ -21,10 +19,9 @@ public class TestCaseResolutionService {
     }
 
     public List<TestCase> resolveTestCases() {
-        String reportType = config.getValue(REPORT_TYPE);
-        String path = config.getValue(REPORT_PATH);
+        String reportType = config.getValue(ConfigProperty.REPORT_TYPE);
         ReportTransformer transformer = ReportTransformerFactory.getInstance().getTransformer(reportType);
-        List<TestCase> testCases = transformer.transformToTestCases(path);
+        List<TestCase> testCases = transformer.transformToTestCases(config);
         if (testCases == null) {
             throw new ZephyrSyncException("No Test Cases extracted from the Test Report");
         }

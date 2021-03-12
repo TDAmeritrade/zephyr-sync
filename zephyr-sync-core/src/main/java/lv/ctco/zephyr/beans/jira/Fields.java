@@ -1,8 +1,8 @@
 package lv.ctco.zephyr.beans.jira;
 
 import lv.ctco.zephyr.beans.Metafield;
-import lv.ctco.zephyr.enums.ConfigProperty;
 import lv.ctco.zephyr.util.ConfigBasedJsonProperty;
+import lv.ctco.zephyr.enums.ConfigProperty;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public class Fields {
     private Metafield project;
     private Metafield assignee;
     private Metafield issuetype;
-    private Metafield priority;
+    //private Metafield priority;
     private Metafield severity;
     private List<Metafield> versions;
     private String[] labels;
@@ -76,6 +76,7 @@ public class Fields {
         this.versions = versions;
     }
 
+    /*
     public Metafield getPriority() {
         return priority;
     }
@@ -83,6 +84,7 @@ public class Fields {
     public void setPriority(Metafield priority) {
         this.priority = priority;
     }
+     */
 
     @ConfigBasedJsonProperty(ConfigProperty.SEVERITY)
     public Metafield getSeverity() {

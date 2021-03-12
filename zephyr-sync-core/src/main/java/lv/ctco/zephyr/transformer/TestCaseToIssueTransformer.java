@@ -20,13 +20,16 @@ public class TestCaseToIssueTransformer {
             issue.getFields().setTestCaseUniqueId(testCase.getUniqueId());
         }
 
-        setIssueFieldsFromTestCaseAttributes(issue, testCase);
+        setIssueFieldsFromTestCaseAttributes(config, issue, testCase);
         setIssueFieldsFromConfig(issue, config);
         return issue;
     }
 
-    public static void setIssueFieldsFromTestCaseAttributes(Issue issue, TestCase testCase) {
-        issue.getFields().setSummary(testCase.getName());
+    public static void setIssueFieldsFromTestCaseAttributes(Config config, Issue issue, TestCase testCase) {
+        if (testCase.getId() != null){
+            issue.setId(testCase.getId());
+        }
+        issue.getFields().setSummary(("true".equals(config.getValue(ConfigProperty.CONSOLIDATE_PARAMETERIZED_TESTS)) ? testCase.getConsolidatedName() : testCase.getName()));
         issue.getFields().setDescription(
                 TextUtils.isBlank(testCase.getDescription()) ?
                         testCase.getSuiteName() :
@@ -40,12 +43,6 @@ public class TestCaseToIssueTransformer {
             Metafield severity = new Metafield();
             severity.setId(testCase.getSeverity().getIndex().toString());
             issue.getFields().setSeverity(severity);
-        }
-
-        if (testCase.getPriority() != null) {
-            Metafield priority = new Metafield();
-            priority.setName(testCase.getPriority().getName());
-            issue.getFields().setPriority(priority);
         }
 
         List<String> labels = new ArrayList<>();
