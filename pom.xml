@@ -109,7 +109,6 @@
         </repository>
     </repositories>
 
-    <!--
     <distributionManagement>
         <repository>
             <id>plugin-artifactory-central</id>
@@ -124,6 +123,5 @@
             <url>https://artifactory.associatesys.local/artifactory/plugins-snapshot-local</url>
         </snapshotRepository>
     </distributionManagement>
-    -->
 
 </project>
