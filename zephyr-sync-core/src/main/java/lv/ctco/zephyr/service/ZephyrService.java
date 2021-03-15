@@ -11,7 +11,7 @@ import lv.ctco.zephyr.enums.TestStatus;
 import lv.ctco.zephyr.util.HttpUtils;
 import lv.ctco.zephyr.beans.zapi.Execution;
 import lv.ctco.zephyr.util.ObjectTransformer;
-import org.apache.http.HttpResponse;
+import com.google.api.client.http.HttpResponse;
 
 import java.io.IOException;
 import java.net.URLEncoder;

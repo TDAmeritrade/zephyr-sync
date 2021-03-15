@@ -3,13 +3,15 @@ package lv.ctco.zephyr.enums;
 import lv.ctco.zephyr.ZephyrSyncException;
 
 public enum ConfigProperty {
-    USERNAME("username", true),
-    PASSWORD("password", true),
+    USERNAME("username", false),
+    PASSWORD("password", false),
     REPORT_TYPE("reportType", true),
     PROJECT_KEY("projectKey", true),
     RELEASE_VERSION("releaseVersion", false),
     TEST_CYCLE("testCycle", false, "Unknown"),
     JIRA_URL("jiraUrl", true),
+    JIRA_REST_ENDPOINT( "jiraRestEndpoint", false, "/rest/"),
+    JIRA_ACCESS_TOKEN_ENDPOINT("jiraAccessTokenEndpoint", false, "/plugins/servlet/oauth/access-token"),
     REPORT_PATH("reportPath", true),
     FILE_REGEX("fileRegex", false, "TEST.*\\.xml"),
     ORDERED_STEPS("orderedSteps", false, "false"),
@@ -27,7 +29,11 @@ public enum ConfigProperty {
     DESCRIPTION_REGEX("descriptionRegex", false),
     DESCRIPTION_REGEX_MATCH_GROUP( "descriptionRegexMatchGroup", false, "0"),
     APPLICATION_NAME( "applicationName", false),
-    CONSOLIDATE_PARAMETERIZED_TESTS( "consolidateParameterizedTests", false, "true");
+    CONSOLIDATE_PARAMETERIZED_TESTS( "consolidateParameterizedTests", false, "true"),
+    OAUTH_TOKEN( "oauthToken", false),
+    OAUTH_SECRET( "oauthSecret", false),
+    OAUTH_PRIVATE_KEY( "oauthPrivateKey", false);
+
 
     private String propertyName;
     private boolean mandatory;

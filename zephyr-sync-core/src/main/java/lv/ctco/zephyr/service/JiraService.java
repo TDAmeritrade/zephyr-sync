@@ -12,7 +12,7 @@ import lv.ctco.zephyr.transformer.TestCaseToIssueTransformer;
 import lv.ctco.zephyr.util.HttpUtils;
 import lv.ctco.zephyr.ZephyrSyncException;
 import lv.ctco.zephyr.util.ObjectTransformer;
-import org.apache.http.HttpResponse;
+import com.google.api.client.http.HttpResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -65,7 +65,7 @@ public class JiraService {
         HttpResponse response = HttpUtils.post(config, "api/2/issue", issue);
         HttpUtils.ensureResponse(response, 201, "ERROR: Could not create JIRA Test item");
 
-        String responseBody = readInputStream(response.getEntity().getContent());
+        String responseBody = readInputStream(response.getContent());
         Metafield result = ObjectTransformer.deserialize(responseBody, Metafield.class);
         if (result != null) {
             testCase.setId(Integer.valueOf(result.getId()));

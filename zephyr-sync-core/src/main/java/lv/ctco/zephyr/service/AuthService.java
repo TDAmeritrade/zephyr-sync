@@ -1,5 +1,6 @@
 package lv.ctco.zephyr.service;
 
+import com.google.api.client.http.HttpHeaders;
 import lv.ctco.zephyr.Config;
 import lv.ctco.zephyr.beans.jira.ErrorResponse;
 import lv.ctco.zephyr.beans.jira.Login;
@@ -8,7 +9,7 @@ import lv.ctco.zephyr.util.HttpUtils;
 import lv.ctco.zephyr.enums.ConfigProperty;
 import lv.ctco.zephyr.util.ObjectTransformer;
 import lv.ctco.zephyr.util.Utils;
-import org.apache.http.HttpResponse;
+import com.google.api.client.http.HttpResponse;
 import org.apache.http.impl.client.BasicCookieStore;
 
 import java.io.IOException;
@@ -32,21 +33,22 @@ public class AuthService {
             Login login = new Login(config.getValue(ConfigProperty.USERNAME), config.getValue(ConfigProperty.PASSWORD));
 
             HttpResponse response = HttpUtils.post(config, "auth/1/session", login);
-            if (response.getStatusLine().getStatusCode() == 403) {
-                if (response.containsHeader("X-Authentication-Denied-Reason")) {
-                    log("ERROR: JIRA authentication denied reason: " + response.getFirstHeader("X-Authentication-Denied-Reason").getValue());
+            if (response.getStatusCode() == 403) {
+                HttpHeaders headers = response.getHeaders();
+                if (response.getHeaders().containsKey("X-Authentication-Denied-Reason")) {
+                    log("ERROR: JIRA authentication denied reason: " + response.getHeaders().get("X-Authentication-Denied-Reason").toString());
                 }
 
-                ErrorResponse errorResponse = ObjectTransformer.deserialize(Utils.readInputStream(response.getEntity().getContent()), ErrorResponse.class);
+                ErrorResponse errorResponse = ObjectTransformer.deserialize(Utils.readInputStream(response.getContent()), ErrorResponse.class);
                 List<String> errorMessages = errorResponse.getErrorMessages();
                 log("ERROR: JIRA authentication failed, error messages: " + errorMessages.stream().collect(Collectors.joining(", ")));
                 return;
             }
-            if (response.getStatusLine().getStatusCode() != 200) {
-                log("ERROR: JIRA authentication failed: " + response.getStatusLine().getProtocolVersion() + " " + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase());
+            if (response.getStatusCode() != 200) {
+                log("ERROR: JIRA authentication failed: " + response.getStatusCode() + " " + response.getStatusMessage());
                 return;
             }
-            SessionResponse loginResponse = ObjectTransformer.deserialize(Utils.readInputStream(response.getEntity().getContent()), SessionResponse.class);
+            SessionResponse loginResponse = ObjectTransformer.deserialize(Utils.readInputStream(response.getContent()), SessionResponse.class);
             if (loginResponse != null) {
                 jSessionId = loginResponse.getSession().get("value");
             }

@@ -22,13 +22,13 @@ public class ZephyrSyncMojo
     /**
      * User name used to connect to JIRA.
      */
-    @Parameter( required = true )
+    @Parameter( required = false )
     private String username;
 
     /**
      * Password for the user to connect to JIRA.
      */
-    @Parameter( required = true )
+    @Parameter( required = false )
     private String password;
 
     /**
@@ -56,10 +56,22 @@ public class ZephyrSyncMojo
     private String testCycle;
 
     /**
-     * URL of JIRA (it's RESTful API endpoint), eg "http://your.jira.server/jira/rest/".
+     * URL of JIRA, eg "http://your.jira.server/jira/".
      */
     @Parameter( required = true )
     private String jiraUrl;
+
+    /**
+     * URL of JIRA Rest Endpoint, eg "/rest/".
+     */
+    @Parameter( defaultValue = "/rest/")
+    private String jiraRestEndpoint;
+
+    /**
+     * URL of JIRA Access Token Endpoint, eg "/plugins/servlet/oauth/access-token".
+     */
+    @Parameter( defaultValue = "/plugins/servlet/oauth/access-token")
+    private String jiraAccessTokenEndpoint;
 
     /**
      * Path on the file system where reports are stored, eg "${project.build.directory}/cucumber-report/report.json".
@@ -163,6 +175,24 @@ public class ZephyrSyncMojo
     @Parameter( defaultValue = "true")
     private Boolean consolidateParameterizedTests;
 
+    /**
+     * The generated token for OAuth
+     */
+    @Parameter
+    private String oauthToken;
+
+    /**
+     * The client secret generated with OAuth token
+     */
+    @Parameter
+    private String oauthSecret;
+
+    /**
+     * The private key for OAuth authentication
+     */
+    @Parameter
+    private String oauthPrivateKey;
+
 
     public void execute()
         throws MojoExecutionException, MojoFailureException
@@ -192,6 +222,8 @@ public class ZephyrSyncMojo
         config.setValue( ConfigProperty.PROJECT_KEY, projectKey );
         config.setValue( ConfigProperty.RELEASE_VERSION, releaseVersion );
         config.setValue( ConfigProperty.JIRA_URL, jiraUrl );
+        config.setValue( ConfigProperty.JIRA_REST_ENDPOINT, jiraRestEndpoint);
+        config.setValue( ConfigProperty.JIRA_ACCESS_TOKEN_ENDPOINT, jiraAccessTokenEndpoint);
         config.setValue( ConfigProperty.REPORT_PATH, reportPath );
         config.setValue( ConfigProperty.FILE_REGEX, fileRegex);
         config.setValue( ConfigProperty.ORDERED_STEPS, orderedSteps );
@@ -209,6 +241,9 @@ public class ZephyrSyncMojo
         config.setValue( ConfigProperty.DESCRIPTION_REGEX_MATCH_GROUP, descriptionRegexMatchGroup);
         config.setValue( ConfigProperty.APPLICATION_NAME, applicationName);
         config.setValue( ConfigProperty.CONSOLIDATE_PARAMETERIZED_TESTS, consolidateParameterizedTests);
+        config.setValue( ConfigProperty.OAUTH_TOKEN, oauthToken);
+        config.setValue( ConfigProperty.OAUTH_SECRET, oauthSecret);
+        config.setValue( ConfigProperty.OAUTH_PRIVATE_KEY, oauthPrivateKey);
         if (useGitBranchForCycle != null && useGitBranchForCycle){
             String branch = (applicationName != null && !"".equals(applicationName) ? applicationName + "-" : "") + getCurrentGitBranch();
             System.out.println("##### Using branch as cycle: " + branch);

@@ -1,5 +1,6 @@
 package lv.ctco.zephyr.service;
 
+import com.google.api.client.http.HttpResponse;
 import lv.ctco.zephyr.Config;
 import lv.ctco.zephyr.beans.Metafield;
 import lv.ctco.zephyr.beans.jira.Project;
@@ -11,7 +12,6 @@ import lv.ctco.zephyr.beans.zapi.NewCycle;
 import lv.ctco.zephyr.util.Utils;
 import lv.ctco.zephyr.enums.ConfigProperty;
 import lv.ctco.zephyr.util.ObjectTransformer;
-import org.apache.http.HttpResponse;
 
 import java.io.IOException;
 import java.util.Map;
@@ -98,7 +98,7 @@ public class MetaInfoRetrievalService {
         newCycle.setVersionId(versionId);
         newCycle.setName(config.getValue(ConfigProperty.TEST_CYCLE));
         HttpResponse response = HttpUtils.post(config, "zapi/latest/cycle", newCycle);
-        Cycle cycle = ObjectTransformer.deserialize(Utils.readInputStream(response.getEntity().getContent()), Cycle.class);
+        Cycle cycle = ObjectTransformer.deserialize(Utils.readInputStream(response.getContent()), Cycle.class);
         return cycle.getId();
     }
 
