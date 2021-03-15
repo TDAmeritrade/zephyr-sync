@@ -46,6 +46,7 @@ public class CookieHttpProvider implements HttpProvider{
         String uri = config.getValue(ConfigProperty.JIRA_URL) + config.getValue(ConfigProperty.JIRA_REST_ENDPOINT) + url;
         Utils.log("POST: " + uri);
         HttpContent content = new JsonHttpContent( new GsonFactory(), entity);
+        System.out.println("########## content: " + content.toString());
         HttpRequest request = transport.createRequestFactory().buildPostRequest(new GenericUrl(uri), content);
         setCommonHeaders(request);
         HttpResponse response = request.execute();
