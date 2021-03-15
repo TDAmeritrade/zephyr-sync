@@ -92,6 +92,7 @@
                     <artifactId>commons-io</artifactId>
                     <version>2.4</version>
                 </dependency>
+                <!--
                 <dependency>
                     <groupId>org.apache.httpcomponents</groupId>
                     <artifactId>httpclient</artifactId>
@@ -107,6 +108,7 @@
                         </exclusion>
                     </exclusions>
                 </dependency>
+                -->
                 <!-- https://mvnrepository.com/artifact/com.google.http-client/google-http-client-apache-v2 -->
                 <dependency>
                     <groupId>com.google.http-client</groupId>
