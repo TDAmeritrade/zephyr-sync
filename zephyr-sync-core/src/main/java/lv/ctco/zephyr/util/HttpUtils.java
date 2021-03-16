@@ -4,15 +4,12 @@ import com.google.api.client.auth.oauth.OAuthParameters;
 import com.google.api.client.http.HttpResponse;
 import lv.ctco.zephyr.Config;
 import lv.ctco.zephyr.ZephyrSyncException;
-import lv.ctco.zephyr.http.CookieHttpProvider;
+import lv.ctco.zephyr.http.BasicAuthHttpProvider;
 import lv.ctco.zephyr.http.HttpProvider;
 import lv.ctco.zephyr.http.OAuthHttpProvider;
 import lv.ctco.zephyr.oauth.JiraOAuthTokenFactory;
-import lv.ctco.zephyr.service.AuthService;
 import lv.ctco.zephyr.enums.ConfigProperty;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -25,7 +22,7 @@ public class HttpUtils {
         if (config.getValue(ConfigProperty.OAUTH_TOKEN)!=null && !"".equals(config.getValue(ConfigProperty.OAUTH_TOKEN))){
             return new OAuthHttpProvider();
         }else{
-            return new CookieHttpProvider();
+            return new BasicAuthHttpProvider();
         }
     }
 

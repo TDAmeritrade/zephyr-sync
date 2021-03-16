@@ -1,9 +1,6 @@
 package lv.ctco.zephyr.http;
 
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpContent;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpResponse;
+import com.google.api.client.http.*;
 import com.google.api.client.http.apache.v2.ApacheHttpTransport;
 import com.google.api.client.http.json.JsonHttpContent;
 import com.google.api.client.json.gson.GsonFactory;
@@ -17,12 +14,11 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.io.*;
 
-public class CookieHttpProvider implements HttpProvider{
+public class BasicAuthHttpProvider implements HttpProvider{
 
     private static CloseableHttpClient getHttpClient() {
         return HttpClientBuilder
                 .create()
-                .setDefaultCookieStore(AuthService.COOKIE)
                 .build();
     }
 
@@ -33,7 +29,10 @@ public class CookieHttpProvider implements HttpProvider{
         String uri = config.getValue(ConfigProperty.JIRA_URL) + config.getValue(ConfigProperty.JIRA_REST_ENDPOINT) + url;
         Utils.log("GET: " + uri);
         HttpRequest request = transport.createRequestFactory().buildGetRequest(new GenericUrl(uri));
+
         setCommonHeaders(request);
+        BasicAuthentication auth = new BasicAuthentication(config.getValue(ConfigProperty.USERNAME), config.getValue(ConfigProperty.PASSWORD));
+        auth.intercept(request);
         HttpResponse response = request.execute();
         httpClient.close();
         return Utils.readInputStream(response.getContent());
@@ -46,9 +45,10 @@ public class CookieHttpProvider implements HttpProvider{
         String uri = config.getValue(ConfigProperty.JIRA_URL) + config.getValue(ConfigProperty.JIRA_REST_ENDPOINT) + url;
         Utils.log("POST: " + uri);
         HttpContent content = new JsonHttpContent( new GsonFactory(), entity);
-        System.out.println("########## content: " + content.toString());
         HttpRequest request = transport.createRequestFactory().buildPostRequest(new GenericUrl(uri), content);
         setCommonHeaders(request);
+        BasicAuthentication auth = new BasicAuthentication(config.getValue(ConfigProperty.USERNAME), config.getValue(ConfigProperty.PASSWORD));
+        auth.intercept(request);
         HttpResponse response = request.execute();
         httpClient.close();
         return response;
@@ -63,6 +63,8 @@ public class CookieHttpProvider implements HttpProvider{
         HttpContent content = new JsonHttpContent( new GsonFactory(), entity);
         HttpRequest request = transport.createRequestFactory().buildPutRequest(new GenericUrl(uri), content);
         setCommonHeaders(request);
+        BasicAuthentication auth = new BasicAuthentication(config.getValue(ConfigProperty.USERNAME), config.getValue(ConfigProperty.PASSWORD));
+        auth.intercept(request);
         HttpResponse response = request.execute();
         httpClient.close();
         return response;
