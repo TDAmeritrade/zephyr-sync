@@ -6,9 +6,11 @@ import com.google.api.client.http.json.JsonHttpContent;
 import com.google.api.client.json.gson.GsonFactory;
 import lv.ctco.zephyr.Config;
 import lv.ctco.zephyr.enums.ConfigProperty;
+import lv.ctco.zephyr.util.ObjectTransformer;
 import lv.ctco.zephyr.util.Utils;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 public class BasicAuthHttpProvider implements HttpProvider{
 
@@ -30,11 +32,11 @@ public class BasicAuthHttpProvider implements HttpProvider{
 
     @Override
     public HttpResponse post(Config config, String url, Object entity) throws IOException {
+        String json = ObjectTransformer.serialize(entity);
         ApacheHttpTransport transport = new ApacheHttpTransport();
         String uri = config.getValue(ConfigProperty.JIRA_URL) + config.getValue(ConfigProperty.JIRA_REST_ENDPOINT) + url;
         Utils.log("POST: " + uri);
-        HttpContent content = new JsonHttpContent( new GsonFactory(), entity);
-        HttpRequest request = transport.createRequestFactory().buildPostRequest(new GenericUrl(uri), content);
+        HttpRequest request = transport.createRequestFactory().buildPostRequest(new GenericUrl(uri), new ByteArrayContent("application/json", json.getBytes(StandardCharsets.UTF_8)));
         setCommonHeaders(request);
         BasicAuthentication auth = new BasicAuthentication(config.getValue(ConfigProperty.USERNAME), config.getValue(ConfigProperty.PASSWORD));
         auth.intercept(request);
@@ -46,11 +48,11 @@ public class BasicAuthHttpProvider implements HttpProvider{
 
     @Override
     public HttpResponse put(Config config, String url, Object entity) throws IOException {
+        String json = ObjectTransformer.serialize(entity);
         ApacheHttpTransport transport = new ApacheHttpTransport();
         String uri = config.getValue(ConfigProperty.JIRA_URL) + config.getValue(ConfigProperty.JIRA_REST_ENDPOINT) + url;
         Utils.log("PUT: " + uri);
-        HttpContent content = new JsonHttpContent( new GsonFactory(), entity);
-        HttpRequest request = transport.createRequestFactory().buildPutRequest(new GenericUrl(uri), content);
+        HttpRequest request = transport.createRequestFactory().buildPutRequest(new GenericUrl(uri), new ByteArrayContent("application/json", json.getBytes(StandardCharsets.UTF_8)));
         setCommonHeaders(request);
         BasicAuthentication auth = new BasicAuthentication(config.getValue(ConfigProperty.USERNAME), config.getValue(ConfigProperty.PASSWORD));
         auth.intercept(request);
