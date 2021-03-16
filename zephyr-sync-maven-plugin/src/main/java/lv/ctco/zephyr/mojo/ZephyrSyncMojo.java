@@ -193,6 +193,12 @@ public class ZephyrSyncMojo
     @Parameter
     private String oauthPrivateKey;
 
+    /**
+     * Http Transport timeout
+     */
+    @Parameter( defaultValue = "60000")
+    private String httpTimeout;
+
 
     public void execute()
         throws MojoExecutionException, MojoFailureException
@@ -244,6 +250,7 @@ public class ZephyrSyncMojo
         config.setValue( ConfigProperty.OAUTH_TOKEN, oauthToken);
         config.setValue( ConfigProperty.OAUTH_SECRET, oauthSecret);
         config.setValue( ConfigProperty.OAUTH_PRIVATE_KEY, oauthPrivateKey);
+        config.setValue( ConfigProperty.HTTP_TIMEOUT, httpTimeout);
         if (useGitBranchForCycle != null && useGitBranchForCycle){
             String branch = (applicationName != null && !"".equals(applicationName) ? applicationName + "-" : "") + getCurrentGitBranch();
             System.out.println("##### Using branch as cycle: " + branch);

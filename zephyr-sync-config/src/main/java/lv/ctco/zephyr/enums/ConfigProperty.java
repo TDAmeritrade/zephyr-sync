@@ -32,7 +32,8 @@ public enum ConfigProperty {
     CONSOLIDATE_PARAMETERIZED_TESTS( "consolidateParameterizedTests", false, "true"),
     OAUTH_TOKEN( "oauthToken", false),
     OAUTH_SECRET( "oauthSecret", false),
-    OAUTH_PRIVATE_KEY( "oauthPrivateKey", false);
+    OAUTH_PRIVATE_KEY( "oauthPrivateKey", false),
+    HTTP_TIMEOUT( "httpTimeout", false, "60000");
 
 
     private String propertyName;

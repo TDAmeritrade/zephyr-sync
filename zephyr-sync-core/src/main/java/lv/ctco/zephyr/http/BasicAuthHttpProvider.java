@@ -2,8 +2,6 @@ package lv.ctco.zephyr.http;
 
 import com.google.api.client.http.*;
 import com.google.api.client.http.apache.v2.ApacheHttpTransport;
-import com.google.api.client.http.json.JsonHttpContent;
-import com.google.api.client.json.gson.GsonFactory;
 import lv.ctco.zephyr.Config;
 import lv.ctco.zephyr.enums.ConfigProperty;
 import lv.ctco.zephyr.util.ObjectTransformer;
@@ -14,19 +12,26 @@ import java.nio.charset.StandardCharsets;
 
 public class BasicAuthHttpProvider implements HttpProvider{
 
+    private int getTimeout(Config config){
+        try{
+            return Integer.parseInt(config.getValue(ConfigProperty.HTTP_TIMEOUT));
+        } catch (NumberFormatException e){
+            return 60000;
+        }
+    }
+
     @Override
     public String getAndReturnBody(Config config, String url) throws IOException {
         ApacheHttpTransport transport = new ApacheHttpTransport();
         String uri = config.getValue(ConfigProperty.JIRA_URL) + config.getValue(ConfigProperty.JIRA_REST_ENDPOINT) + url;
         Utils.log("GET: " + uri);
         HttpRequest request = transport.createRequestFactory().buildGetRequest(new GenericUrl(uri));
-        request.setReadTimeout(60000);
+        request.setReadTimeout(getTimeout(config));
 
         setCommonHeaders(request);
         BasicAuthentication auth = new BasicAuthentication(config.getValue(ConfigProperty.USERNAME), config.getValue(ConfigProperty.PASSWORD));
         auth.intercept(request);
         HttpResponse response = request.execute();
-        //httpClient.close();
         return Utils.readInputStream(response.getContent());
     }
 
@@ -40,9 +45,8 @@ public class BasicAuthHttpProvider implements HttpProvider{
         setCommonHeaders(request);
         BasicAuthentication auth = new BasicAuthentication(config.getValue(ConfigProperty.USERNAME), config.getValue(ConfigProperty.PASSWORD));
         auth.intercept(request);
-        request.setReadTimeout(60000);
+        request.setReadTimeout(getTimeout(config));
         HttpResponse response = request.execute();
-        //httpClient.close();
         return response;
     }
 
@@ -56,12 +60,11 @@ public class BasicAuthHttpProvider implements HttpProvider{
         setCommonHeaders(request);
         BasicAuthentication auth = new BasicAuthentication(config.getValue(ConfigProperty.USERNAME), config.getValue(ConfigProperty.PASSWORD));
         auth.intercept(request);
-        request.setReadTimeout(60000);
+        request.setReadTimeout(getTimeout(config));
         HttpResponse response = request.execute();
-        //httpClient.close();
         return response;
     }
-    private static void setCommonHeaders(HttpRequest request) throws IOException {
+    private static void setCommonHeaders(HttpRequest request) {
         request.getHeaders().set("Accept", "application/json");
     }
 
