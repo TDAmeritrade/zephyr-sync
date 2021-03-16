@@ -18,6 +18,7 @@ public class BasicAuthHttpProvider implements HttpProvider{
         String uri = config.getValue(ConfigProperty.JIRA_URL) + config.getValue(ConfigProperty.JIRA_REST_ENDPOINT) + url;
         Utils.log("GET: " + uri);
         HttpRequest request = transport.createRequestFactory().buildGetRequest(new GenericUrl(uri));
+        request.setReadTimeout(60000);
 
         setCommonHeaders(request);
         BasicAuthentication auth = new BasicAuthentication(config.getValue(ConfigProperty.USERNAME), config.getValue(ConfigProperty.PASSWORD));
@@ -37,6 +38,7 @@ public class BasicAuthHttpProvider implements HttpProvider{
         setCommonHeaders(request);
         BasicAuthentication auth = new BasicAuthentication(config.getValue(ConfigProperty.USERNAME), config.getValue(ConfigProperty.PASSWORD));
         auth.intercept(request);
+        request.setReadTimeout(60000);
         HttpResponse response = request.execute();
         //httpClient.close();
         return response;
@@ -52,6 +54,7 @@ public class BasicAuthHttpProvider implements HttpProvider{
         setCommonHeaders(request);
         BasicAuthentication auth = new BasicAuthentication(config.getValue(ConfigProperty.USERNAME), config.getValue(ConfigProperty.PASSWORD));
         auth.intercept(request);
+        request.setReadTimeout(60000);
         HttpResponse response = request.execute();
         //httpClient.close();
         return response;

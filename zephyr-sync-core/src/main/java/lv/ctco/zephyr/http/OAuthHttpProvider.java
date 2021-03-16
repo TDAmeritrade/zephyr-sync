@@ -22,13 +22,12 @@ public class OAuthHttpProvider implements HttpProvider{
     @Override
     public String getAndReturnBody(Config config, String url) throws IOException {
         try {
-            CloseableHttpClient httpClient = getHttpClient();
-            ApacheHttpTransport transport = new ApacheHttpTransport(httpClient);
+            ApacheHttpTransport transport = new ApacheHttpTransport();
             HttpRequestFactory factory = transport.createRequestFactory(getOAuthParameters(config));
             GenericUrl genericUrl = new GenericUrl(config.getValue(ConfigProperty.JIRA_URL) + config.getValue(ConfigProperty.JIRA_REST_ENDPOINT) + url);
             HttpRequest request = factory.buildGetRequest(genericUrl);
+            request.setReadTimeout(60000);
             com.google.api.client.http.HttpResponse response = request.execute();
-            httpClient.close();
             return Utils.readInputStream(response.getContent());
         }catch(Exception e){
             throw new IOException(e);
@@ -38,14 +37,13 @@ public class OAuthHttpProvider implements HttpProvider{
     @Override
     public HttpResponse post(Config config, String url, Object entity) throws IOException {
         try{
-            CloseableHttpClient httpClient = getHttpClient();
-            ApacheHttpTransport transport = new ApacheHttpTransport(httpClient);
+            ApacheHttpTransport transport = new ApacheHttpTransport();
             HttpRequestFactory factory = transport.createRequestFactory(getOAuthParameters(config));
             GenericUrl genericUrl = new GenericUrl(config.getValue(ConfigProperty.JIRA_URL) + config.getValue(ConfigProperty.JIRA_REST_ENDPOINT) + url);
             HttpContent content = new JsonHttpContent( new GsonFactory(), entity);
             HttpRequest request = factory.buildPostRequest(genericUrl, content);
+            request.setReadTimeout(60000);
             HttpResponse response = request.execute();
-            httpClient.close();
             return response;
         }catch(Exception e){
             throw new IOException(e);
@@ -55,14 +53,13 @@ public class OAuthHttpProvider implements HttpProvider{
     @Override
     public HttpResponse put(Config config, String url, Object entity) throws IOException {
         try{
-            CloseableHttpClient httpClient = getHttpClient();
-            ApacheHttpTransport transport = new ApacheHttpTransport(httpClient);
+            ApacheHttpTransport transport = new ApacheHttpTransport();
             HttpRequestFactory factory = transport.createRequestFactory(getOAuthParameters(config));
             GenericUrl genericUrl = new GenericUrl(config.getValue(ConfigProperty.JIRA_URL) + config.getValue(ConfigProperty.JIRA_REST_ENDPOINT) + url);
             HttpContent content = new JsonHttpContent( new GsonFactory(), entity);
             HttpRequest request = factory.buildPutRequest(genericUrl, content);
+            request.setReadTimeout(60000);
             HttpResponse response = request.execute();
-            httpClient.close();
             return response;
         }catch(Exception e){
             throw new IOException(e);
@@ -72,12 +69,6 @@ public class OAuthHttpProvider implements HttpProvider{
     private OAuthParameters getOAuthParameters(Config config) throws InvalidKeySpecException, NoSuchAlgorithmException {
         JiraOAuthTokenFactory tokenFactory = new JiraOAuthTokenFactory(config);
         return tokenFactory.getJiraOAuthToken().createParameters();
-    }
-
-    private static CloseableHttpClient getHttpClient() {
-        return HttpClientBuilder
-                .create()
-                .build();
     }
 
 }
